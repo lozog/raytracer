@@ -8,15 +8,18 @@ using namespace std;
 
 #define DEFAULT 0
 
-Ray makePrimaryRay(uint x, uint y, glm::vec3 eye, glm::vec3 view, size_t w, size_t h, double fovx, double fovy) {
-	double aspectRatio = w / h;
+Ray makePrimaryRay(int x, int y, glm::vec3 a, glm::vec3 b, glm::vec3 eye, glm::vec3 view) {
+	/*double aspectRatio = w / h;
 
 	double Px = (2 * ((x + 0.5) / w) - 1) * tan(fovy) * aspectRatio;
 	double Py =  (1 - 2 * ((y + 0.5) / h)) * tan(fovy);
 // float Py = (1 - 2 * ((y + 0.5) / imageHeight) * tan(fov / 2 * M_PI / 180);
 	// cout << Px << " " << Py << endl;
 	glm::vec3 rayDir = view + glm::vec3(Px, Py, -1);
-	rayDir = glm::normalize(rayDir);
+	rayDir = glm::normalize(rayDir);*/
+	cout << x << " " << y << " " << x*a << " " << y*b << endl;
+	glm::vec3 rayDir = glm::normalize(view) + x*a + y*b;
+
 
 	Ray ray( eye, rayDir );
 	return ray;
@@ -94,7 +97,8 @@ void A4_Render(
 			image(x, y, 2) = ((y < h/2 && x < w/2)
 						  || (y >= h/2 && x >= w/2)) ? 1.0 : 0.0;
 			#else
-			Ray ray = makePrimaryRay(x, y, eye, view, w, h, glm::radians(fovx), glm::radians(fovy));
+			// convert 
+			Ray ray = makePrimaryRay(x - w/2, y - h/2, a, b, eye, view);
 			// cout << ray.pos << ", " << ray.dir << endl;
 			image(x, y, 0) = 1;
 			image(x, y, 1) = 0;
