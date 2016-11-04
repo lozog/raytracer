@@ -135,6 +135,7 @@ glm::vec3 illuminate(const IntersectInfo& info,
 	glm::vec3 result = glm::vec3();
 	result += material->m_kd * ambient;
 
+	#if 0
 	for (Light* light : lights) {
 		const glm::vec3 lightDir = info.point - light->position;
 
@@ -149,8 +150,9 @@ glm::vec3 illuminate(const IntersectInfo& info,
 		float fatt = c0 + c1*r + c2*pow(r, 2);
 
 		result += material->m_kd * light->colour/fatt * dotNL;
-		// do stuff
-	}
+	} // for
+	#endif
+
 	return result;
 }
 
