@@ -10,7 +10,7 @@ Primitive::~Primitive()
 {
 }
 
-bool Primitive::intersect(const glm::vec3 & eye, const Ray & ray, float& t0) {
+bool Primitive::intersect(const glm::vec3 & eye, const Ray & ray, double & t0) {
 	cout << "Primitive intersect" << endl;
 	return false;
 }
@@ -19,7 +19,7 @@ Sphere::~Sphere()
 {
 }
 
-bool Sphere::intersect(const glm::vec3 & eye, const Ray & ray, float& t0) {
+bool Sphere::intersect(const glm::vec3 & eye, const Ray & ray, double & t0) {
 	return false;
 }
 
@@ -27,7 +27,7 @@ Cube::~Cube()
 {
 }
 
-bool Cube::intersect(const glm::vec3 & eye, const Ray & ray, float& t0) {
+bool Cube::intersect(const glm::vec3 & eye, const Ray & ray, double & t0) {
 	return false;
 }
 
@@ -35,7 +35,7 @@ NonhierSphere::~NonhierSphere()
 {
 }
 
-bool NonhierSphere::intersect(const glm::vec3 & eye, const Ray & ray, float& t0) {
+bool NonhierSphere::intersect(const glm::vec3 & eye, const Ray & ray, double & t0) {
 	// glm::vec4 center = childGeometryNode->trans * glm::vec4(0,0,0,1);
 	// cout << "nonhiersphere intersect" << endl;
 	glm::vec4 center = glm::vec4(m_pos, 1);
@@ -46,9 +46,9 @@ bool NonhierSphere::intersect(const glm::vec3 & eye, const Ray & ray, float& t0)
 	// cout << L << endl;
 	// cout << "2: ray.dir " << ray.dir << endl;
 
-	float a = pow(glm::length(ray.dir), 2);
-	float b = 2 * glm::dot(ray.dir, L);
-	float c = pow(glm::length(L), 2.0f) - pow(radius, 2.0f);
+	double a = pow(glm::length(ray.dir), 2);
+	double b = 2 * glm::dot(ray.dir, L);
+	double c = pow(glm::length(L), 2.0f) - pow(radius, 2.0f);
 
 		// cout << "2: a b c " << a << " " << b << " " << c << endl;
 
@@ -60,7 +60,7 @@ NonhierBox::~NonhierBox()
 {
 }
 
-bool NonhierBox::intersect(const glm::vec3 & eye, const Ray & ray, float& t0) {
+bool NonhierBox::intersect(const glm::vec3 & eye, const Ray & ray, double & t0) {
 	cout << "nonhierbox intersect" << endl;
 	return false;
 }

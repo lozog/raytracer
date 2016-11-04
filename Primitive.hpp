@@ -6,19 +6,19 @@
 class Primitive {
 public:
   virtual ~Primitive();
-  virtual bool intersect(const glm::vec3 & eye, const Ray & ray, float& t0);
+  virtual bool intersect(const glm::vec3 & eye, const Ray & ray, double & t0);
 };
 
 class Sphere : public Primitive {
 public:
   virtual ~Sphere();
-  virtual bool intersect(const glm::vec3 & eye, const Ray & ray, float& t0);
+  virtual bool intersect(const glm::vec3 & eye, const Ray & ray, double & t0);
 };
 
 class Cube : public Primitive {
 public:
   virtual ~Cube();
-  virtual bool intersect(const glm::vec3 & eye, const Ray & ray, float& t0);
+  virtual bool intersect(const glm::vec3 & eye, const Ray & ray, double & t0);
 };
 
 class NonhierSphere : public Primitive {
@@ -28,7 +28,7 @@ public:
   {
   }
   virtual ~NonhierSphere();
-  virtual bool intersect(const glm::vec3 & eye, const Ray & ray, float& t0);
+  virtual bool intersect(const glm::vec3 & eye, const Ray & ray, double & t0);
 
 // private:
   glm::vec3 m_pos;
@@ -43,7 +43,7 @@ public:
   }
   
   virtual ~NonhierBox();
-  virtual bool intersect(const glm::vec3 & eye, const Ray & ray, float& t0);
+  virtual bool intersect(const glm::vec3 & eye, const Ray & ray, double & t0);
 
 private:
   glm::vec3 m_pos;

@@ -3,22 +3,26 @@
 #include <cmath>                            // pow
 #include <algorithm>                        // swap
 #include "A4.hpp"                           // EPSILON
+#include "polyroots.hpp"                    // quadraticRoots
 #include <iostream>
+
+size_t quadraticRoots(double A, double B, double C, double roots[2]);
 
 /*
 	Solves a*t^2 + b*t + c, stores minimum positive root in t0
 	if such a root exists
 */
-// TODO: maybe we should be using polyroots.cpp here...
-bool findPosRoot(float a, float b, float c, float & t0) {
+bool findPosRoot(double a, double b, double c, double & t0) {
 		// std::cout << a << " " << b << " " << c << std::endl;
-    float determinant = b*b - 4*a*c;
-    float t1;
-		// std::cout << determinant << std::endl;
+    double t1;
 
-    if (determinant > 0) {
-        t0 = (-b + sqrt(determinant)) / (2*a);
-        t1 = (-b - sqrt(determinant)) / (2*a);
+    double roots[2];
+    size_t numRoots = quadraticRoots(a, b, c, roots);
+
+    t0 = roots[0];
+    t1 = roots[1];
+
+    if (numRoots == 2) {
         // std::cout << "t0: " << t0 << ", t1: " << t1 << std::endl;
         if ( t0 > t1 ) std::swap(t0, t1);
 
@@ -28,9 +32,8 @@ bool findPosRoot(float a, float b, float c, float & t0) {
 				return false;						// t0 and t1 both negative
 		} // if
 
-    } else if ( abs(determinant - 0.0f) < EPSILON) { // TODO: actually check properly
-        std::cout << "det == 0" << std::endl;
-        t0 = (-b + sqrt(determinant)) / (2*a);		// just one root
+    } else if ( numRoots == 1 ) {
+        // std::cout << "det == 0" << std::endl;
         if ( t0 < 0 ) {
         	return false;
         }
@@ -39,4 +42,4 @@ bool findPosRoot(float a, float b, float c, float & t0) {
     } // if
     // std::cout << "found: " << t0 << std::endl;
 	return true;
-} // findPosRoot
+}
