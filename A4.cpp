@@ -21,16 +21,6 @@ Ray makePrimaryRay(int x, int y,
 	const glm::vec3 b,
 	const glm::vec3 eye,
 	const glm::vec3 view) {
-	/*double aspectRatio = w / h;
-
-	double Px = (2 * ((x + 0.5) / w) - 1) * tan(fovy) * aspectRatio;
-	double Py =  (1 - 2 * ((y + 0.5) / h)) * tan(fovy);
-// float Py = (1 - 2 * ((y + 0.5) / imageHeight) * tan(fov / 2 * M_PI / 180);
-	// cout << Px << " " << Py << endl;
-	glm::vec3 rayDir = view + glm::vec3(Px, Py, -1);
-	rayDir = glm::normalize(rayDir);*/
-	// cout << x << " " << y << " " << x*a << " " << y*b << endl;
-
 
 	glm::vec3 rayDir = glm::normalize(glm::normalize(view) + x*a + y*b);
 
@@ -55,31 +45,30 @@ bool findPosRoot(float a, float b, float c, float & t0) {
         // cout << "t0: " << t0 << ", t1: " << t1 << endl; 
         if ( t0 > t1 ) swap(t0, t1);
 
-        if ( t0 < 0 ) {
-        	t0 = t1;							// t0 negative, so try t1
+		if ( t0 < 0 ) {
+			t0 = t1;								// t0 negative, so try t1
         	if ( t0 < 0 )
-        		return false;					// t0 and t1 both negative
-        } // if
+				return false;						// t0 and t1 both negative
+		} // if
 
     } else if ( abs(determinant - 0.0f) < EPSILON) { // TODO: actually check properly
         cout << "det == 0" << endl;
-        t0 = (-b + sqrt(determinant)) / (2*a);	// just one root
+        t0 = (-b + sqrt(determinant)) / (2*a);		// just one root
         if ( t0 < 0 ) {
         	return false;
         }
     } else {
-        return false;							// no real roots
+        return false;								// no real roots
     } // if
 
 	return true;
 } // findPosRoot
 
 IntersectInfo sceneIntersect(SceneNode * root, glm::vec3 eye, const Ray ray) {
-	// todo: find intersection with sphere, draw it white if hit, then we'll know if we're on the right track!
 	// SceneNode * closestObject = NULL;
 	GeometryNode* closestObjectNode = NULL;
 	NonhierSphere* closestObjectPrim = NULL;
-	float tmin; 						// distance of closestObject
+	float tmin; 												// distance of closestObject
 	// cout << "sceneIntersect" << endl;
 
 	for ( SceneNode * child : root->children ) {
@@ -100,19 +89,19 @@ IntersectInfo sceneIntersect(SceneNode * root, glm::vec3 eye, const Ray ray) {
 		float b = 2 * glm::dot(ray.dir, L);
 		float c = pow(glm::length(L), 2.0f) - pow(radius, 2.0f);
 
-		float t0; 								// results of intersection, if any
+		float t0; 												// results of intersection, if any
 		if ( !findPosRoot(a, b, c, t0) ) 
-			continue; 							// didn't find any
+			continue; 											// didn't find any
 		// cout << "foundPosRoot: " << t0 << endl;
 
-		if ( closestObjectNode == NULL || t0 < tmin ) {						// closest object found?
+		if ( closestObjectNode == NULL || t0 < tmin ) {			// closest object found?
 			closestObjectNode = childGeometryNode;
 			closestObjectPrim = childPrim;
 			tmin = t0;
 		} // if
 	} // for
 
-	if ( tmin > 0 ) {							// if we found an object
+	if ( tmin > 0 ) {											// if we found an object
 		IntersectInfo info;
 		info.point 	= ray.pos + tmin * ray.dir;
 		info.normal = (info.point - closestObjectPrim->m_pos) / closestObjectPrim->m_radius;
