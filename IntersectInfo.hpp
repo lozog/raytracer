@@ -1,9 +1,11 @@
 #pragma once
 
-class IntersectInfo {
-public:
-  virtual ~IntersectInfo();
+#include <glm/glm.hpp>
+#include "Material.hpp"
 
-protected:
+struct IntersectInfo {
   IntersectInfo();
+  Material* material;
+  glm::vec3 point;
+  glm::vec3 normal;
 };

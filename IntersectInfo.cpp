@@ -3,5 +3,3 @@
 IntersectInfo::IntersectInfo()
 {}
 
-IntersectInfo::~IntersectInfo()
-{}

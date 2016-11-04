@@ -25,7 +25,7 @@ public:
   }
   virtual ~NonhierSphere();
 
-private:
+// private:
   glm::vec3 m_pos;
   double m_radius;
 };
