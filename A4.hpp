@@ -6,6 +6,8 @@
 #include "Light.hpp"
 #include "Image.hpp"
 
+const float EPSILON = 0.001f;
+
 void A4_Render(
 		// What to render
 		SceneNode * root,
