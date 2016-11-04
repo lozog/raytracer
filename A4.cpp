@@ -79,7 +79,7 @@ IntersectInfo sceneIntersect(SceneNode * root, glm::vec3 eye, const Ray ray) {
 	// SceneNode * closestObject = NULL;
 	GeometryNode* closestObjectNode = NULL;
 	NonhierSphere* closestObjectPrim = NULL;
-	float tmin = -1.0f; 						// distance of closestObject
+	float tmin; 						// distance of closestObject
 	// cout << "sceneIntersect" << endl;
 
 	for ( SceneNode * child : root->children ) {
@@ -105,7 +105,7 @@ IntersectInfo sceneIntersect(SceneNode * root, glm::vec3 eye, const Ray ray) {
 			continue; 							// didn't find any
 		// cout << "foundPosRoot: " << t0 << endl;
 
-		if ( t0 > tmin ) {						// closest object found?
+		if ( closestObjectNode == NULL || t0 < tmin ) {						// closest object found?
 			closestObjectNode = childGeometryNode;
 			closestObjectPrim = childPrim;
 			tmin = t0;
