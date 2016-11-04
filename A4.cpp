@@ -129,25 +129,26 @@ IntersectInfo sceneIntersect(SceneNode * root, glm::vec3 eye, const Ray ray) {
 glm::vec3 illuminate(const IntersectInfo& info,
 					 const std::list<Light *>  & lights,
 					 const glm::vec3 & ambient,
-					 const Ray ray) {
+					 const Ray ray,
+					 const glm::vec3 eye) {
 
 	PhongMaterial* material = dynamic_cast<PhongMaterial*>(info.material);
 
 	glm::vec3 result = glm::vec3();
 	result += material->m_kd * ambient;
-	double s = material->m_shininess;									// sharpness of highlight
-	// double s = 25;									// sharpness of highlight
+	// double s = material->m_shininess;									// sharpness of highlight
+	double s = 2;									// sharpness of highlight
 
-	glm::vec3 v = -1.0f * ray.dir;
+	glm::vec3 v = eye - info.point;
 
 	#if 1
 	for (Light* light : lights) {
-		const glm::vec3 lightDir = info.point - light->position;
+		const glm::vec3 lightDir = light->position - info.point;
 		float r = glm::length(lightDir);								// distance from light
 
 		// positive dot product of normal and light vectors, or 0
-		float dotNL = glm::dot(info.normal, glm::normalize(lightDir));
-		if (dotNL < 0) dotNL = 0.0f;
+		float dotNL = max(glm::dot(info.normal, glm::normalize(lightDir)), 0.0f);
+		// if (dotNL < 0) dotNL = 0.0f;
 		// cout << "distance to light: " << r << endl;
 
 		float c0 = light->falloff[0];									// calculate attenuation
@@ -161,13 +162,13 @@ glm::vec3 illuminate(const IntersectInfo& info,
 
 		float dotHN = pow(glm::dot(h, info.normal), s);
 		if (dotHN < 0) dotHN = 0.0f;
-		cout << dotHN << endl;
+		// cout << dotHN << endl;
 
 		result += material->m_kd * lightFAtt * dotNL;					// apply diffuse shading
 		// result += material->m_kd * lightFAtt;					// apply diffuse shading
 		result += material->m_ks * lightFAtt * dotHN;					// apply specular shading
 		// cout << material->m_kd << "*" << lightFAtt << "*" << dotNL << endl;
-		cout << material->m_ks * lightFAtt * dotHN << endl;
+		// cout << material->m_ks * lightFAtt * dotHN << endl;
 	} // for
 	#endif
 
@@ -259,7 +260,7 @@ void A4_Render(
 			try {
 				IntersectInfo info = sceneIntersect(root, eye, ray);
 				// cout << x << " " << y << " hit obj!" << endl;
-				colour = illuminate(info, lights, ambient, ray);
+				colour = illuminate(info, lights, ambient, ray, eye);
 			} catch (int noObj) {
 				// no object intersection. draw background colour.
 				colour = bgColour;
