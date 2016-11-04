@@ -74,12 +74,12 @@ bool findPosRoot(float a, float b, float c, float & t0) {
 	return true;
 } // findPosRoot
 
-IntersectInfo sceneIntersect(SceneNode * root, glm::vec3 eye, Ray ray) {
+IntersectInfo sceneIntersect(SceneNode * root, glm::vec3 eye, const Ray ray) {
 	// todo: find intersection with sphere, draw it white if hit, then we'll know if we're on the right track!
 	// SceneNode * closestObject = NULL;
-	GeometryNode* closestObject = NULL;
+	GeometryNode* closestObjectNode = NULL;
+	NonhierSphere* closestObjectPrim = NULL;
 	float tmin = -1.0f; 						// distance of closestObject
-	glm::vec4 closestObjCenter;
 	// cout << "sceneIntersect" << endl;
 
 	for ( SceneNode * child : root->children ) {
@@ -106,8 +106,8 @@ IntersectInfo sceneIntersect(SceneNode * root, glm::vec3 eye, Ray ray) {
 		// cout << "foundPosRoot: " << t0 << endl;
 
 		if ( t0 > tmin ) {						// closest object found?
-			closestObject = childGeometryNode;
-			closestObjCenter = center;
+			closestObjectNode = childGeometryNode;
+			closestObjectPrim = childPrim;
 			tmin = t0;
 		} // if
 	} // for
@@ -115,10 +115,10 @@ IntersectInfo sceneIntersect(SceneNode * root, glm::vec3 eye, Ray ray) {
 	if ( tmin > 0 ) {							// if we found an object
 		IntersectInfo info;
 		info.point 	= ray.pos + tmin * ray.dir;
-		info.normal = 2*(info.point - glm::vec3(closestObjCenter));
+		info.normal = (info.point - closestObjectPrim->m_pos) / closestObjectPrim->m_radius;
 
 		// GeometryNode* closestObjGeometryNode = dynamic_cast<GeometryNode*>(closestObject);
-		info.material = closestObject->m_material;
+		info.material = closestObjectNode->m_material;
 		// cout << "hit object at " << info.point << endl;
 		return info;
 	} else {
@@ -128,28 +128,46 @@ IntersectInfo sceneIntersect(SceneNode * root, glm::vec3 eye, Ray ray) {
 
 glm::vec3 illuminate(const IntersectInfo& info,
 					 const std::list<Light *>  & lights,
-					 const glm::vec3 & ambient) {
+					 const glm::vec3 & ambient,
+					 const Ray ray) {
 
 	PhongMaterial* material = dynamic_cast<PhongMaterial*>(info.material);
 
 	glm::vec3 result = glm::vec3();
 	result += material->m_kd * ambient;
+	double s = material->m_shininess;									// sharpness of highlight
+	// double s = 25;									// sharpness of highlight
 
-	#if 0
+	glm::vec3 v = -1.0f * ray.dir;
+
+	#if 1
 	for (Light* light : lights) {
 		const glm::vec3 lightDir = info.point - light->position;
+		float r = glm::length(lightDir);								// distance from light
 
-		float dotNL = glm::dot(info.normal, lightDir);
+		// positive dot product of normal and light vectors, or 0
+		float dotNL = glm::dot(info.normal, glm::normalize(lightDir));
 		if (dotNL < 0) dotNL = 0.0f;
+		// cout << "distance to light: " << r << endl;
 
-		float c0 = light->falloff[0];
+		float c0 = light->falloff[0];									// calculate attenuation
 		float c1 = light->falloff[1];
 		float c2 = light->falloff[2];
-		float r = glm::length(lightDir);						// distance from light
-
 		float fatt = c0 + c1*r + c2*pow(r, 2);
 
-		result += material->m_kd * light->colour/fatt * dotNL;
+		glm::vec3 lightFAtt = light->colour/fatt;						// light with attenuation
+
+		glm::vec3 h = (v + lightDir ) / (glm::length(v + lightDir));
+
+		float dotHN = pow(glm::dot(h, info.normal), s);
+		if (dotHN < 0) dotHN = 0.0f;
+		cout << dotHN << endl;
+
+		result += material->m_kd * lightFAtt * dotNL;					// apply diffuse shading
+		// result += material->m_kd * lightFAtt;					// apply diffuse shading
+		result += material->m_ks * lightFAtt * dotHN;					// apply specular shading
+		// cout << material->m_kd << "*" << lightFAtt << "*" << dotNL << endl;
+		cout << material->m_ks * lightFAtt * dotHN << endl;
 	} // for
 	#endif
 
@@ -210,12 +228,13 @@ void A4_Render(
 	// cout << "a: " << a << endl;
 	// cout << "b: " << b << endl;
 
-	const glm::vec3 bgColour = glm::vec3(0.1f, 0.1f, 0.1f);
+	glm::vec3 bgColour = glm::vec3(0.1f, 0.1f, 0.1f);
 
 	for (uint y = 0; y < h; ++y) {
 		for (uint x = 0; x < w; ++x) {
 			#if DEFAULT
 			// Red: increasing from top to bottom
+			// image(x, y, 0) = (double)y / h;
 			image(x, y, 0) = (double)y / h;
 			// Green: increasing from left to right
 			image(x, y, 1) = (double)x / w;
@@ -223,6 +242,15 @@ void A4_Render(
 			image(x, y, 2) = ((y < h/2 && x < w/2)
 						  || (y >= h/2 && x >= w/2)) ? 1.0 : 0.0;
 			#else
+			// Red: increasing from top to bottom
+			// image(x, y, 0) = (double)y / h;
+			bgColour.x = (double)y / h;
+			// Green: increasing from left to right
+			bgColour.y = (double)x / w;
+			// Blue: in lower-left and upper-right corners
+			bgColour.z = ((y < h/2 && x < w/2)
+						  || (y >= h/2 && x >= w/2)) ? 1.0 : 0.0;
+
 			// convert 
 			Ray ray = makePrimaryRay(x - w/2, y - h/2, a, b, eye, view);
 			// cout << ray.pos << ", " << ray.dir << endl;
@@ -231,7 +259,7 @@ void A4_Render(
 			try {
 				IntersectInfo info = sceneIntersect(root, eye, ray);
 				// cout << x << " " << y << " hit obj!" << endl;
-				colour = illuminate(info, lights, ambient);
+				colour = illuminate(info, lights, ambient, ray);
 			} catch (int noObj) {
 				// no object intersection. draw background colour.
 				colour = bgColour;
@@ -245,4 +273,3 @@ void A4_Render(
 	} // for
 
 }
-
