@@ -6,7 +6,7 @@
 #include "GeometryNode.hpp"
 #include "Ray.hpp"
 #include "IntersectInfo.hpp"
-#include "IntersectInfo.hpp"
+#include "PhongMaterial.hpp"
 
 using namespace std;
 
@@ -16,7 +16,11 @@ const float EPSILON = 0.001f;
 /*
 	Returns a Ray from the eye to the middle of the x,y pixel on screen
 */
-Ray makePrimaryRay(int x, int y, glm::vec3 a, glm::vec3 b, glm::vec3 eye, glm::vec3 view) {
+Ray makePrimaryRay(int x, int y,
+	const glm::vec3 a,
+	const glm::vec3 b,
+	const glm::vec3 eye,
+	const glm::vec3 view) {
 	/*double aspectRatio = w / h;
 
 	double Px = (2 * ((x + 0.5) / w) - 1) * tan(fovy) * aspectRatio;
@@ -38,6 +42,7 @@ Ray makePrimaryRay(int x, int y, glm::vec3 a, glm::vec3 b, glm::vec3 eye, glm::v
 	Solves a*t^2 + b*t + c, stores minimum positive root in t0
 	if such a root exists
 */
+// TODO: maybe we should be using polyroots.cpp here...
 bool findPosRoot(float a, float b, float c, float & t0) {
 		// cout << a << " " << b << " " << c << endl;
     float determinant = b*b - 4*a*c;
@@ -98,7 +103,7 @@ IntersectInfo sceneIntersect(SceneNode * root, glm::vec3 eye, Ray ray) {
 		float t0; 								// results of intersection, if any
 		if ( !findPosRoot(a, b, c, t0) ) 
 			continue; 							// didn't find any
-		cout << "foundPosRoot: " << t0 << endl;
+		// cout << "foundPosRoot: " << t0 << endl;
 
 		if ( t0 > tmin ) {						// closest object found?
 			closestObject = childGeometryNode;
@@ -120,6 +125,34 @@ IntersectInfo sceneIntersect(SceneNode * root, glm::vec3 eye, Ray ray) {
 		throw 0; // no object hit
 	} // if
 } // sceneIntersect
+
+glm::vec3 illuminate(const IntersectInfo& info,
+					 const std::list<Light *>  & lights,
+					 const glm::vec3 & ambient) {
+
+	PhongMaterial* material = dynamic_cast<PhongMaterial*>(info.material);
+
+	glm::vec3 result = glm::vec3();
+	result += material->m_kd * ambient;
+
+	for (Light* light : lights) {
+		const glm::vec3 lightDir = info.point - light->position;
+
+		float dotNL = glm::dot(info.normal, lightDir);
+		if (dotNL < 0) dotNL = 0.0f;
+
+		float c0 = light->falloff[0];
+		float c1 = light->falloff[1];
+		float c2 = light->falloff[2];
+		float r = glm::length(lightDir);						// distance from light
+
+		float fatt = c0 + c1*r + c2*pow(r, 2);
+
+		result += material->m_kd * light->colour/fatt * dotNL;
+		// do stuff
+	}
+	return result;
+}
 
 void A4_Render(
 		// What to render
@@ -169,11 +202,13 @@ void A4_Render(
 	double aspectRatio = w / h;
 	double fovx = fovy * aspectRatio;
 	// cout << fovx << ", " << fovy << endl;
-	double pixelSize = tan( glm::radians( fovx/2 ) ) / h;
-	glm::vec3 a = pixelSize * right;
-	glm::vec3 b = pixelSize * normalize(cross(right, cameraDir));
+	double pixelSize = tan( glm::radians( fovy ) ) / h;
+	const glm::vec3 a = -1.0f * pixelSize * right;
+	const glm::vec3 b = pixelSize * normalize(cross(right, cameraDir));
 	// cout << "a: " << a << endl;
 	// cout << "b: " << b << endl;
+
+	const glm::vec3 bgColour = glm::vec3(0.1f, 0.1f, 0.1f);
 
 	for (uint y = 0; y < h; ++y) {
 		for (uint x = 0; x < w; ++x) {
@@ -190,18 +225,19 @@ void A4_Render(
 			Ray ray = makePrimaryRay(x - w/2, y - h/2, a, b, eye, view);
 			// cout << ray.pos << ", " << ray.dir << endl;
 
-			float red = 0;
+			glm::vec3 colour = glm::vec3();
 			try {
-				IntersectInfo i = sceneIntersect(root, eye, ray);
-				cout << x << " " << y << " hit obj!" << endl;
-				red = 1;
+				IntersectInfo info = sceneIntersect(root, eye, ray);
+				// cout << x << " " << y << " hit obj!" << endl;
+				colour = illuminate(info, lights, ambient);
 			} catch (int noObj) {
 				// no object intersection. draw background colour.
+				colour = bgColour;
 			} // try
 
-			image(x, y, 0) = red;
-			image(x, y, 1) = 0;
-			image(x, y, 2) = 0;
+			image(x, y, 0) = colour.x;
+			image(x, y, 1) = colour.y;
+			image(x, y, 2) = colour.z;
 			#endif // default
 		} // for
 	} // for
