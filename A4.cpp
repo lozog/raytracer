@@ -126,8 +126,7 @@ glm::vec3 illuminate(const IntersectInfo& info,
 
 	glm::vec3 result = glm::vec3();
 	result += material->m_kd * ambient;
-	// double s = material->m_shininess;									// sharpness of highlight
-	double s = 2;									// sharpness of highlight
+	double s = material->m_shininess;									// sharpness of highlight
 
 	glm::vec3 v = eye - info.point;
 
@@ -135,27 +134,22 @@ glm::vec3 illuminate(const IntersectInfo& info,
 	for (Light* light : lights) {
 		const glm::vec3 lightDir = light->position - info.point;
 		float r = glm::length(lightDir);								// distance from light
-		cout << "distance to light 1: " << r << endl;
+		// cout << "distance to light 1: " << r << endl;
 
 		// cast shadow ray
 		Ray shadow( info.point, glm::normalize( lightDir ));
-		// TODO: check closest intersect
-		// if closer than r, we're in a shadow!
 		try {
 			IntersectInfo shadowInfo = sceneIntersect(root, info.point, shadow);
 			float shadowDist = glm::length(light->position - shadowInfo.point);
 			if ( shadowDist - r > EPSILON ) {
 				continue;
 			}
-		} catch (int noShadow) {
-			// continue;
-		}
-
+		} catch (int noShadow) {}
 
 		// positive dot product of normal and light vectors, or 0
 		float dotNL = max(glm::dot(info.normal, glm::normalize(lightDir)), 0.0f);
 		// if (dotNL < 0) dotNL = 0.0f;
-		cout << "distance to light 2: " << r << endl;
+		// cout << "distance to light 2: " << r << endl;
 
 		float c0 = light->falloff[0];									// calculate attenuation
 		float c1 = light->falloff[1];
