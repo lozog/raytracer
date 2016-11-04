@@ -64,7 +64,7 @@ bool findPosRoot(float a, float b, float c, float & t0) {
 	return true;
 } // findPosRoot
 
-IntersectInfo sceneIntersect(SceneNode * root, glm::vec3 eye, const Ray ray) {
+IntersectInfo sceneIntersect(const SceneNode * root, const glm::vec3 eye, const Ray ray) {
 	// SceneNode * closestObject = NULL;
 	GeometryNode* closestObjectNode = NULL;
 	NonhierSphere* closestObjectPrim = NULL;
@@ -101,8 +101,8 @@ IntersectInfo sceneIntersect(SceneNode * root, glm::vec3 eye, const Ray ray) {
 		} // if
 	} // for
 
-	if ( tmin > 0 ) {											// if we found an object
-		IntersectInfo info;
+	if ( closestObjectNode ) {									// if we found an object
+		IntersectInfo info;										// build IntersectInfo
 		info.point 	= ray.pos + tmin * ray.dir;
 		info.normal = (info.point - closestObjectPrim->m_pos) / closestObjectPrim->m_radius;
 
@@ -119,7 +119,8 @@ glm::vec3 illuminate(const IntersectInfo& info,
 					 const std::list<Light *>  & lights,
 					 const glm::vec3 & ambient,
 					 const Ray ray,
-					 const glm::vec3 eye) {
+					 const glm::vec3 eye,
+					 SceneNode * root) {
 
 	PhongMaterial* material = dynamic_cast<PhongMaterial*>(info.material);
 
@@ -134,11 +135,27 @@ glm::vec3 illuminate(const IntersectInfo& info,
 	for (Light* light : lights) {
 		const glm::vec3 lightDir = light->position - info.point;
 		float r = glm::length(lightDir);								// distance from light
+		cout << "distance to light 1: " << r << endl;
+
+		// cast shadow ray
+		Ray shadow( info.point, glm::normalize( lightDir ));
+		// TODO: check closest intersect
+		// if closer than r, we're in a shadow!
+		try {
+			IntersectInfo shadowInfo = sceneIntersect(root, info.point, shadow);
+			float shadowDist = glm::length(light->position - shadowInfo.point);
+			if ( shadowDist - r > EPSILON ) {
+				continue;
+			}
+		} catch (int noShadow) {
+			// continue;
+		}
+
 
 		// positive dot product of normal and light vectors, or 0
 		float dotNL = max(glm::dot(info.normal, glm::normalize(lightDir)), 0.0f);
 		// if (dotNL < 0) dotNL = 0.0f;
-		// cout << "distance to light: " << r << endl;
+		cout << "distance to light 2: " << r << endl;
 
 		float c0 = light->falloff[0];									// calculate attenuation
 		float c1 = light->falloff[1];
@@ -241,7 +258,6 @@ void A4_Render(
 			bgColour.z = ((y < h/2 && x < w/2)
 						  || (y >= h/2 && x >= w/2)) ? 1.0 : 0.0;
 
-			// convert 
 			Ray ray = makePrimaryRay(x - w/2, y - h/2, a, b, eye, view);
 			// cout << ray.pos << ", " << ray.dir << endl;
 
@@ -249,7 +265,8 @@ void A4_Render(
 			try {
 				IntersectInfo info = sceneIntersect(root, eye, ray);
 				// cout << x << " " << y << " hit obj!" << endl;
-				colour = illuminate(info, lights, ambient, ray, eye);
+
+				colour = illuminate(info, lights, ambient, ray, eye, root);
 			} catch (int noObj) {
 				// no object intersection. draw background colour.
 				colour = bgColour;
