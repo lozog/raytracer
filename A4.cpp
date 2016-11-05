@@ -84,8 +84,7 @@ glm::vec3 illuminate(const IntersectInfo& info,
 	double s = material->m_shininess;									// sharpness of highlight
 
 	glm::vec3 v = eye - info.point;
- // 223, 255 has shadow.
-	#if 1
+
 	for (Light* light : lights) {
 		const glm::vec3 lightDir = light->position - info.point;
 		double r = glm::length(lightDir);								// distance from light
@@ -130,7 +129,6 @@ glm::vec3 illuminate(const IntersectInfo& info,
 		// cout << material->m_kd << "*" << lightFAtt << "*" << dotNL << endl;
 		// cout << material->m_ks * lightFAtt * dotHN << endl;
 	} // for
-	#endif
 
 	return result;
 }

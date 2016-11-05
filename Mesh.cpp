@@ -2,6 +2,7 @@
 #include <fstream>
 
 #include <glm/ext.hpp>
+#include <glm/gtx/io.hpp>
 
 // #include "cs488-framework/ObjFileDecoder.hpp"
 #include "Mesh.hpp"
@@ -47,8 +48,32 @@ std::ostream& operator<<(std::ostream& out, const Mesh& mesh)
   return out;
 }
 
+// based on https://www.cs.princeton.edu/courses/archive/fall00/cs426/lectures/raycast/sld017.htm
 bool Mesh::intersect(const glm::vec3 & eye, const Ray & ray, double & t0) {
 	// std::cout << "Mesh intersect" << std::endl;
+
+	for ( Triangle triangle : m_faces ) {
+		double v0 = triangle.v1;
+		double v1 = triangle.v2;
+		double v2 = triangle.v3;
+		glm::vec3 p0 = m_vertices.at(v0);
+		glm::vec3 p1 = m_vertices.at(v1);
+		glm::vec3 p2 = m_vertices.at(v2);
+
+		glm::vec3 planeNorm = glm::normalize(glm::cross(p2 - p1, p1 - p0));
+
+		triangle.normal = planeNorm;
+
+		double D = -v0*p0.x - v1*p0.y - v2*p0.z;
+
+		double t = -(glm::dot(eye, planeNorm) + D) / glm::dot(ray.dir, planeNorm);
+
+		if ( output ) {
+			// std::cout << p0 << " " << p1 << " " << p2 << std::endl;
+			std::cout << planeNorm << " " << t << std::endl;
+			output = false;
+		}
+	}
 	return false;
 }
 
