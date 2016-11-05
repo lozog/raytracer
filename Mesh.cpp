@@ -72,7 +72,7 @@ bool Mesh::intersect(const glm::vec3 & eye, const Ray & ray, double & t0, glm::v
 
 		if ( output ) {
 			// std::cout << p0 << " " << p1 << " " << p2 << std::endl;
-			std::cout << planeNorm << " " << t << std::endl;
+			// std::cout << planeNorm << " " << t << std::endl;
 			output = false;
 		}
 
@@ -105,8 +105,4 @@ bool Mesh::intersect(const glm::vec3 & eye, const Ray & ray, double & t0, glm::v
 		}*/
 
 	return false;
-}
-
-glm::vec3 Mesh::normalAt(glm::vec3 point) {
-	return glm::vec3();
 }

@@ -27,7 +27,6 @@ class Mesh : public Primitive {
 public:
   Mesh( const std::string& fname );
   virtual bool intersect(const glm::vec3 & eye, const Ray & ray, double & t0, glm::vec3 & normal);
-  virtual glm::vec3 normalAt(const glm::vec3 point);
   bool output = true;
 
 private:
