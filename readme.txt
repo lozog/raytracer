@@ -15,3 +15,12 @@ I did not have time to implement:
 -triangle mesh intersection rendering (I almost had it - please see Mesh::intersect in Mesh.cpp)
 -bounding volumes
 -any extra features
+
+I have included the following renderings:
+screenshot.png
+non-hier.png
+
+I am unable include the following renderings:
+macho-cows.png
+simple-cows.png
+nonhier-bb.png

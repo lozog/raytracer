@@ -138,14 +138,17 @@ glm::vec3 illuminate(const IntersectInfo& info,
 }
 
 void generateBG(uint x, uint y, size_t w, size_t h, glm::vec3 & bgColour) {
-	// Red: increasing from top to bottom
-	// image(x, y, 0) = (double)y / h;
-	bgColour.x = (double)y / h;
-	// Green: increasing from left to right
-	bgColour.y = (double)x / w;
-	// Blue: in lower-left and upper-right corners
-	bgColour.z = ((y < h/2 && x < w/2)
-				  || (y >= h/2 && x >= w/2)) ? 1.0 : 0.0;
+	if ( y < 3*h/4 ) {
+		bgColour.x = 0.1f;
+		bgColour.y = (float)y / (float)(6*h);
+		bgColour.z = 0.0f;
+
+	} else {
+		bgColour.x = 0.1f * (float)y / (float)(2*h);
+		bgColour.y = 0.2f;
+		bgColour.z = 0.0f;
+
+	}
 }
 
 void A4_Render(
