@@ -27,32 +27,17 @@ Ray makePrimaryRay(int x, int y,
 }
 
 IntersectInfo sceneIntersect(const SceneNode * root, const glm::vec3 & eye, const Ray & ray) {
-	// SceneNode * closestObject = NULL;
 	GeometryNode* closestObjectNode = NULL;
 	Primitive* closestObjectPrim = NULL;
 	double tmin; 												// distance of closestObject
 	// cout << "sceneIntersect" << endl;
 
 	for ( SceneNode * child : root->children ) {
-		// assuming all non-hierarchical spheres right now
+		// assuming non-hierarchical right now
 		GeometryNode* childGeometryNode = dynamic_cast<GeometryNode*>(child);
 
 		// NonhierSphere* childPrim = dynamic_cast<NonhierSphere*>(childGeometryNode->m_primitive);
 		Primitive* childPrim = childGeometryNode->m_primitive;
-
-		// glm::vec4 center = childGeometryNode->trans * glm::vec4(0,0,0,1);
-		/*glm::vec4 center = glm::vec4(childPrim->m_pos, 1);
-		double radius = childPrim->m_radius;
-
-		glm::vec3 L = eye - glm::vec3(center);
-
-		// cout << L << endl;
-
-		float a = pow(glm::length(ray.dir), 2);
-		float b = 2 * glm::dot(ray.dir, L);
-		float c = pow(glm::length(L), 2.0f) - pow(radius, 2.0f);
-		// cout << "1: a b c " << a << " " << b << " " << c << endl;
-	// cout << "1: ray.dir " << ray.dir << endl;*/
 
 		double t0; 												// results of intersection, if any
 		if ( !childGeometryNode->m_primitive->intersect(eye, ray, t0) )
@@ -79,6 +64,7 @@ IntersectInfo sceneIntersect(const SceneNode * root, const glm::vec3 & eye, cons
 	} else {
 		throw 0; // no object hit
 	} // if
+
 } // sceneIntersect
 
 glm::vec3 illuminate(const IntersectInfo& info,
@@ -143,6 +129,17 @@ glm::vec3 illuminate(const IntersectInfo& info,
 	return result;
 }
 
+void generateBG(uint x, uint y, size_t w, size_t h, glm::vec3 & bgColour) {
+	// Red: increasing from top to bottom
+	// image(x, y, 0) = (double)y / h;
+	bgColour.x = (double)y / h;
+	// Green: increasing from left to right
+	bgColour.y = (double)x / w;
+	// Blue: in lower-left and upper-right corners
+	bgColour.z = ((y < h/2 && x < w/2)
+				  || (y >= h/2 && x >= w/2)) ? 1.0 : 0.0;
+}
+
 void A4_Render(
 		// What to render
 		SceneNode * root,
@@ -201,24 +198,8 @@ void A4_Render(
 
 	for (uint y = 0; y < h; ++y) {
 		for (uint x = 0; x < w; ++x) {
-			#if DEFAULT
-			// Red: increasing from top to bottom
-			// image(x, y, 0) = (double)y / h;
-			image(x, y, 0) = (double)y / h;
-			// Green: increasing from left to right
-			image(x, y, 1) = (double)x / w;
-			// Blue: in lower-left and upper-right corners
-			image(x, y, 2) = ((y < h/2 && x < w/2)
-						  || (y >= h/2 && x >= w/2)) ? 1.0 : 0.0;
-			#else
-			// Red: increasing from top to bottom
-			// image(x, y, 0) = (double)y / h;
-			bgColour.x = (double)y / h;
-			// Green: increasing from left to right
-			bgColour.y = (double)x / w;
-			// Blue: in lower-left and upper-right corners
-			bgColour.z = ((y < h/2 && x < w/2)
-						  || (y >= h/2 && x >= w/2)) ? 1.0 : 0.0;
+
+			generateBG(x, y, w, h, bgColour);
 
 			Ray ray = makePrimaryRay(x - w/2, y - h/2, a, b, eye, view);
 			// cout << ray.pos << ", " << ray.dir << endl;
@@ -237,7 +218,6 @@ void A4_Render(
 			image(x, y, 0) = colour.x;
 			image(x, y, 1) = colour.y;
 			image(x, y, 2) = colour.z;
-			#endif // default
 		} // for
 	} // for
 
