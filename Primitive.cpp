@@ -88,16 +88,8 @@ bool NonhierBox::intersect(const glm::vec3 & eye, const Ray & ray, double & t0) 
 		boxMin[i] = m_pos[i] - (m_size/2);
 		boxMax[i] = m_pos[i] + (m_size/2);
 
-	}
+	} // for
 
-	/*for (int i = 0; i < 3; i += 1) {
-		tmin = (boxMin[i] - ray.pos[i]) / r.dir[i];
-		tmax = (boxMin[i] - ray.pos[i]) / r.dir[i];
-		if (tmin > tmax) swap(tmin, tmax);
-	}*/
-
-
-	#if 1
 	for (int i = 0; i < 3; i += 1) {
 
 		// cout << i << ": " << boxMin << " " << boxMax << endl;
@@ -109,7 +101,7 @@ bool NonhierBox::intersect(const glm::vec3 & eye, const Ray & ray, double & t0) 
 
 		tmin = max(tmin, min(t1, t2));
 		tmax = min(tmax, max(t1, t2));
-	}
+	} // for
 
 	// cout << "min & max: " << tmin << " " << tmax << endl;
 
@@ -120,39 +112,7 @@ bool NonhierBox::intersect(const glm::vec3 & eye, const Ray & ray, double & t0) 
 	}
 	// cout << "nope" << endl;
 	return false;
-	#endif
-	#if 0
-	for (int i = 0; i < 3; i += 1) {
-		double boxMin = m_pos[i] - (m_size/2);
-		double boxMax = m_pos[i] + (m_size/2);
 
-		if (ray.dir[i] != 0.0) {
-			
-
-			double t1 = (boxMin - ray.pos[i]) * (-1.0f * ray.dir)[i];
-			double t2 = (boxMax - ray.pos[i]) * (-1.0f * ray.dir)[i];
-
-			cout << i << ": " << t1 << " " << t2 << endl;
-
-			tmin = max(tmin, min(t1, t2));
-			tmax = min(tmax, max(t1, t2));
-		} else if (ray.pos[i] <= boxMin || ray.pos[i] >= boxMax) {
-			cout << "nope" << endl;
-			return false;
-		}
-		
-	}
-
-	cout << " min & max: " << tmin << " " << tmax << endl;
-
-	if ( tmax > tmin && tmin > 0.0 ) {
-		t0 = tmin;
-		cout << t0 << endl;
-		return true;
-	}
-	cout << "nope" << endl;
-	return false;
-	#endif
 }
 
 glm::vec3 NonhierBox::normalAt(const glm::vec3 point) {

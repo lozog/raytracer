@@ -2,7 +2,6 @@
 
 #include <cmath>                            // pow
 #include <algorithm>                        // swap
-#include "A4.hpp"                           // EPSILON
 #include "polyroots.hpp"                    // quadraticRoots
 #include <iostream>
 

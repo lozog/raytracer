@@ -46,3 +46,12 @@ std::ostream& operator<<(std::ostream& out, const Mesh& mesh)
   out << "}";
   return out;
 }
+
+bool Mesh::intersect(const glm::vec3 & eye, const Ray & ray, double & t0) {
+	// std::cout << "Mesh intersect" << std::endl;
+	return false;
+}
+
+glm::vec3 Mesh::normalAt(glm::vec3 point) {
+	return glm::vec3();
+}

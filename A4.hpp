@@ -6,7 +6,7 @@
 #include "Light.hpp"
 #include "Image.hpp"
 
-const float EPSILON = 0.001f;
+const double EPSILON = 0.00001f;
 
 void A4_Render(
 		// What to render

@@ -26,7 +26,7 @@ Ray makePrimaryRay(int x, int y,
 	return ray;
 }
 
-IntersectInfo sceneIntersect(const SceneNode * root, const glm::vec3 & eye, const Ray & ray) {
+IntersectInfo sceneIntersect(const SceneNode * root, const glm::vec3 & eye, const Ray & ray, uint x, uint y) {
 	GeometryNode* closestObjectNode = NULL;
 	Primitive* closestObjectPrim = NULL;
 	double tmin; 												// distance of closestObject
@@ -53,13 +53,16 @@ IntersectInfo sceneIntersect(const SceneNode * root, const glm::vec3 & eye, cons
 
 	if ( closestObjectNode != NULL ) {									// if we found an object
 		IntersectInfo info;										// build IntersectInfo
-		info.point 	= ray.pos + tmin * ray.dir;
+		info.point 	= ray.pos + (tmin - 0.01f) * ray.dir;		// offset a little bit to account for error
 		// info.normal = (info.point - closestObjectPrim->m_pos) / closestObjectPrim->m_radius;
 		info.normal = closestObjectPrim->normalAt(info.point);
 
 		// GeometryNode* closestObjGeometryNode = dynamic_cast<GeometryNode*>(closestObject);
 		info.material = closestObjectNode->m_material;
-		// cout << "hit object at " << info.point << endl;
+/*		if (x == 223 && y == 255) {
+			cout << eye << endl;
+		}*/
+			// cout << "hit object at " << info.point << endl;
 		return info;
 	} else {
 		throw 0; // no object hit
@@ -72,7 +75,7 @@ glm::vec3 illuminate(const IntersectInfo& info,
 					 const glm::vec3 & ambient,
 					 const Ray ray,
 					 const glm::vec3 eye,
-					 SceneNode * root) {
+					 SceneNode * root, uint x, uint y) {
 
 	PhongMaterial* material = dynamic_cast<PhongMaterial*>(info.material);
 
@@ -81,11 +84,11 @@ glm::vec3 illuminate(const IntersectInfo& info,
 	double s = material->m_shininess;									// sharpness of highlight
 
 	glm::vec3 v = eye - info.point;
-
+ // 223, 255 has shadow.
 	#if 1
 	for (Light* light : lights) {
 		const glm::vec3 lightDir = light->position - info.point;
-		float r = glm::length(lightDir);								// distance from light
+		double r = glm::length(lightDir);								// distance from light
 		// cout << "distance to light 1: " << r << endl;
 
 		// cast shadow ray
@@ -93,12 +96,15 @@ glm::vec3 illuminate(const IntersectInfo& info,
 		// cout << info.point << " " << glm::normalize( lightDir ) << endl;
 		// cout << shadow.pos << " " << shadow.dir << endl;
 		try {
-			IntersectInfo shadowInfo = sceneIntersect(root, info.point, shadow);
-			float shadowDist = glm::length(light->position - shadowInfo.point);
-			if ( shadowDist - r > EPSILON ) {
+			IntersectInfo shadowInfo = sceneIntersect(root, info.point, shadow, x, y);
+			double shadowDist = glm::length(light->position - shadowInfo.point);
+			if ( shadowDist - r < EPSILON ) {
+				// result += glm::vec3(1.0f, 1.0f, 1.0f);
 				continue;
 			}
-		} catch (int noShadow) {}
+		} catch (int noShadow) {
+			// shadow ray didn't hit light
+		}
 
 		// positive dot product of normal and light vectors, or 0
 		float dotNL = max(glm::dot(info.normal, glm::normalize(lightDir)), 0.0f);
@@ -206,10 +212,10 @@ void A4_Render(
 
 			glm::vec3 colour = glm::vec3();
 			try {
-				IntersectInfo info = sceneIntersect(root, eye, ray);
+				IntersectInfo info = sceneIntersect(root, eye, ray, x, y);
 				// cout << x << " " << y << " hit obj!" << endl;
 
-				colour = illuminate(info, lights, ambient, ray, eye, root);
+				colour = illuminate(info, lights, ambient, ray, eye, root, x, y);
 			} catch (int noObj) {
 				// no object intersection. draw background colour.
 				colour = bgColour;
