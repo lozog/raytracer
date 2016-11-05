@@ -6,12 +6,13 @@
 #include <algorithm>                        // swap
 using namespace std;
 #include <glm/gtx/io.hpp>
+#include <glm/ext.hpp>
 
 Primitive::~Primitive()
 {
 }
 
-bool Primitive::intersect(const glm::vec3 & eye, const Ray & ray, double & t0) {
+bool Primitive::intersect(const glm::vec3 & eye, const Ray & ray, double & t0, glm::vec3 & normal) {
 	// cout << "Primitive intersect" << endl;
 	return false;
 }
@@ -24,7 +25,7 @@ Sphere::~Sphere()
 {
 }
 
-bool Sphere::intersect(const glm::vec3 & eye, const Ray & ray, double & t0) {
+bool Sphere::intersect(const glm::vec3 & eye, const Ray & ray, double & t0, glm::vec3 & normal) {
 	return false;
 }
 
@@ -36,7 +37,7 @@ Cube::~Cube()
 {
 }
 
-bool Cube::intersect(const glm::vec3 & eye, const Ray & ray, double & t0) {
+bool Cube::intersect(const glm::vec3 & eye, const Ray & ray, double & t0, glm::vec3 & normal) {
 	return false;
 }
 
@@ -48,7 +49,8 @@ NonhierSphere::~NonhierSphere()
 {
 }
 
-bool NonhierSphere::intersect(const glm::vec3 & eye, const Ray & ray, double & t0) {
+bool NonhierSphere::intersect(const glm::vec3 & eye, const Ray & ray,
+							  double & t0, glm::vec3 & normal) {
 	// glm::vec4 center = childGeometryNode->trans * glm::vec4(0,0,0,1);
 	// cout << "nonhiersphere intersect" << endl;
 	glm::vec4 center = glm::vec4(m_pos, 1);
@@ -65,7 +67,11 @@ bool NonhierSphere::intersect(const glm::vec3 & eye, const Ray & ray, double & t
 
 		// cout << "2: a b c " << a << " " << b << " " << c << endl;
 
-	return findPosRoot(a, b, c, t0);
+	if ( findPosRoot(a, b, c, t0) ) {
+		normal = normalAt(ray.pos + (t0 - 0.01f) * ray.dir);
+		return true;
+	}
+	return false;
 }
 
 glm::vec3 NonhierSphere::normalAt(glm::vec3 point) {
@@ -77,7 +83,8 @@ NonhierBox::~NonhierBox()
 {
 }
 
-bool NonhierBox::intersect(const glm::vec3 & eye, const Ray & ray, double & t0) {
+bool NonhierBox::intersect(const glm::vec3 & eye, const Ray & ray,
+						   double & t0, glm::vec3 & normal) {
 	// cout << "nonhierbox intersect" << endl;
 
 	// based on  https://tavianator.com/fast-branchless-raybounding-box-intersections-part-2-nans/
@@ -107,6 +114,7 @@ bool NonhierBox::intersect(const glm::vec3 & eye, const Ray & ray, double & t0) 
 
 	if ( tmax > max(tmin, 0.0) ) {
 		t0 = tmin;
+		normal = normalAt(ray.pos + (t0 - 0.01f) * ray.dir);
 		// cout << t0 << endl;
 		return true;
 	}

@@ -6,21 +6,21 @@
 class Primitive {
 public:
   virtual ~Primitive();
-  virtual bool intersect(const glm::vec3 & eye, const Ray & ray, double & t0);
+  virtual bool intersect(const glm::vec3 & eye, const Ray & ray, double & t0, glm::vec3 & normal);
   virtual glm::vec3 normalAt(const glm::vec3 point);
 };
 
 class Sphere : public Primitive {
 public:
   virtual ~Sphere();
-  virtual bool intersect(const glm::vec3 & eye, const Ray & ray, double & t0);
+  virtual bool intersect(const glm::vec3 & eye, const Ray & ray, double & t0, glm::vec3 & normal);
   virtual glm::vec3 normalAt(const glm::vec3 point);
 };
 
 class Cube : public Primitive {
 public:
   virtual ~Cube();
-  virtual bool intersect(const glm::vec3 & eye, const Ray & ray, double & t0);
+  virtual bool intersect(const glm::vec3 & eye, const Ray & ray, double & t0, glm::vec3 & normal);
   virtual glm::vec3 normalAt(const glm::vec3 point);
 };
 
@@ -31,7 +31,7 @@ public:
   {
   }
   virtual ~NonhierSphere();
-  virtual bool intersect(const glm::vec3 & eye, const Ray & ray, double & t0);
+  virtual bool intersect(const glm::vec3 & eye, const Ray & ray, double & t0, glm::vec3 & normal);
   glm::vec3 normalAt(const glm::vec3 point);
 
 private:
@@ -47,7 +47,7 @@ public:
   }
   
   virtual ~NonhierBox();
-  virtual bool intersect(const glm::vec3 & eye, const Ray & ray, double & t0);
+  virtual bool intersect(const glm::vec3 & eye, const Ray & ray, double & t0, glm::vec3 & normal);
   virtual glm::vec3 normalAt(const glm::vec3 point);
 
 private:

@@ -30,6 +30,7 @@ IntersectInfo sceneIntersect(const SceneNode * root, const glm::vec3 & eye, cons
 	GeometryNode* closestObjectNode = NULL;
 	Primitive* closestObjectPrim = NULL;
 	double tmin; 												// distance of closestObject
+	glm::vec3 normalMin;										// normal of closestObject
 	// cout << "sceneIntersect" << endl;
 
 	for ( SceneNode * child : root->children ) {
@@ -40,13 +41,15 @@ IntersectInfo sceneIntersect(const SceneNode * root, const glm::vec3 & eye, cons
 		Primitive* childPrim = childGeometryNode->m_primitive;
 
 		double t0; 												// results of intersection, if any
-		if ( !childGeometryNode->m_primitive->intersect(eye, ray, t0) )
+		glm::vec3 normal;
+		if ( !childGeometryNode->m_primitive->intersect(eye, ray, t0, normal) )
 			continue; 											// didn't find any
 		// cout << "foundPosRoot: " << t0 << endl;
 
 		if ( closestObjectNode == NULL || t0 < tmin ) {			// closest object found?
 			closestObjectNode = childGeometryNode;
 			closestObjectPrim = childPrim;
+			normalMin = normal;
 			tmin = t0;
 		} // if
 	} // for
@@ -55,7 +58,8 @@ IntersectInfo sceneIntersect(const SceneNode * root, const glm::vec3 & eye, cons
 		IntersectInfo info;										// build IntersectInfo
 		info.point 	= ray.pos + (tmin - 0.01f) * ray.dir;		// offset a little bit to account for error
 		// info.normal = (info.point - closestObjectPrim->m_pos) / closestObjectPrim->m_radius;
-		info.normal = closestObjectPrim->normalAt(info.point);
+		// info.normal = closestObjectPrim->normalAt(info.point);
+		info.normal = normalMin;
 
 		// GeometryNode* closestObjGeometryNode = dynamic_cast<GeometryNode*>(closestObject);
 		info.material = closestObjectNode->m_material;

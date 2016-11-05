@@ -49,8 +49,10 @@ std::ostream& operator<<(std::ostream& out, const Mesh& mesh)
 }
 
 // based on https://www.cs.princeton.edu/courses/archive/fall00/cs426/lectures/raycast/sld017.htm
-bool Mesh::intersect(const glm::vec3 & eye, const Ray & ray, double & t0) {
+bool Mesh::intersect(const glm::vec3 & eye, const Ray & ray, double & t0, glm::vec3 & normal) {
 	// std::cout << "Mesh intersect" << std::endl;
+
+	float tmin = INT_MAX;
 
 	for ( Triangle triangle : m_faces ) {
 		double v0 = triangle.v1;
@@ -73,7 +75,35 @@ bool Mesh::intersect(const glm::vec3 & eye, const Ray & ray, double & t0) {
 			std::cout << planeNorm << " " << t << std::endl;
 			output = false;
 		}
+
+		if ( t < tmin ) {
+			tmin = t;
+		}
 	}
+
+	// make sure t > 0
+
+	// Here, I was attempting to use Cramer's rule to see if the point lay
+	// within the triangle, but ran out of time.
+	// based on https://www.cs.utah.edu/~shirley/books/fcg2/rt.pdf (section 10.3.2)
+	/*	if ( t < 0.0 || t == INT_MAX ) {
+			return false;
+		}
+
+		// now check if point inside triangle, Cramer's method
+
+		glm::vec3 P = eye + (t - 0.01f)*ray.dir;
+
+		double M = a*(e*i - h*f) + b*(g*f - d*i) + c*(d*h - e*g);
+
+		double s = (j*(e*i - h*f) + k*(g*f - d*i) + l*(d*h - e*g)) / M;
+
+		double t = (i*(a*k - j*b) + h*(j*c - a*l) + g*(b*l - k*c)) / M;
+
+		if (s < 0 || t < 0 || s+t > 1.0) {
+			return false;
+		}*/
+
 	return false;
 }
 
