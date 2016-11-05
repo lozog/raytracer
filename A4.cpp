@@ -29,7 +29,7 @@ Ray makePrimaryRay(int x, int y,
 IntersectInfo sceneIntersect(const SceneNode * root, const glm::vec3 & eye, const Ray & ray) {
 	// SceneNode * closestObject = NULL;
 	GeometryNode* closestObjectNode = NULL;
-	NonhierSphere* closestObjectPrim = NULL;
+	Primitive* closestObjectPrim = NULL;
 	double tmin; 												// distance of closestObject
 	// cout << "sceneIntersect" << endl;
 
@@ -37,7 +37,8 @@ IntersectInfo sceneIntersect(const SceneNode * root, const glm::vec3 & eye, cons
 		// assuming all non-hierarchical spheres right now
 		GeometryNode* childGeometryNode = dynamic_cast<GeometryNode*>(child);
 
-		NonhierSphere* childPrim = dynamic_cast<NonhierSphere*>(childGeometryNode->m_primitive);
+		// NonhierSphere* childPrim = dynamic_cast<NonhierSphere*>(childGeometryNode->m_primitive);
+		Primitive* childPrim = childGeometryNode->m_primitive;
 
 		// glm::vec4 center = childGeometryNode->trans * glm::vec4(0,0,0,1);
 		/*glm::vec4 center = glm::vec4(childPrim->m_pos, 1);
@@ -56,19 +57,21 @@ IntersectInfo sceneIntersect(const SceneNode * root, const glm::vec3 & eye, cons
 		double t0; 												// results of intersection, if any
 		if ( !childGeometryNode->m_primitive->intersect(eye, ray, t0) )
 			continue; 											// didn't find any
-		// cout << "foundPosRoot: " << t0 << endl;
+		cout << "foundPosRoot: " << t0 << endl;
 
 		if ( closestObjectNode == NULL || t0 < tmin ) {			// closest object found?
 			closestObjectNode = childGeometryNode;
 			closestObjectPrim = childPrim;
 			tmin = t0;
 		} // if
+		cout << "test" << endl;
 	} // for
 
 	if ( closestObjectNode != NULL ) {									// if we found an object
 		IntersectInfo info;										// build IntersectInfo
 		info.point 	= ray.pos + tmin * ray.dir;
-		info.normal = (info.point - closestObjectPrim->m_pos) / closestObjectPrim->m_radius;
+		// info.normal = (info.point - closestObjectPrim->m_pos) / closestObjectPrim->m_radius;
+		info.normal = closestObjectPrim->normalAt(info.point);
 
 		// GeometryNode* closestObjGeometryNode = dynamic_cast<GeometryNode*>(closestObject);
 		info.material = closestObjectNode->m_material;
