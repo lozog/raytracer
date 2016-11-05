@@ -115,7 +115,7 @@ bool NonhierBox::intersect(const glm::vec3 & eye, const Ray & ray, double & t0) 
 
 	if ( tmax > max(tmin, 0.0) ) {
 		t0 = tmin;
-		cout << t0 << endl;
+		// cout << t0 << endl;
 		return true;
 	}
 	// cout << "nope" << endl;
@@ -157,10 +157,12 @@ bool NonhierBox::intersect(const glm::vec3 & eye, const Ray & ray, double & t0) 
 
 glm::vec3 NonhierBox::normalAt(const glm::vec3 point) {
 	// based on http://blog.johnnovak.net/2016/10/22/the-nim-raytracer-project-part-4-calculating-box-normals/
+	cout << "normalAt" << endl;
 	glm::vec3 normPos = point - m_pos;
 	glm::vec3 normal = glm::normalize(glm::vec3(
 		(int)normPos.x / m_size,
 		(int)normPos.y / m_size,
 		(int)normPos.z / m_size
 		));
+	return normal;
 }

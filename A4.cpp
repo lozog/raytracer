@@ -57,14 +57,13 @@ IntersectInfo sceneIntersect(const SceneNode * root, const glm::vec3 & eye, cons
 		double t0; 												// results of intersection, if any
 		if ( !childGeometryNode->m_primitive->intersect(eye, ray, t0) )
 			continue; 											// didn't find any
-		cout << "foundPosRoot: " << t0 << endl;
+		// cout << "foundPosRoot: " << t0 << endl;
 
 		if ( closestObjectNode == NULL || t0 < tmin ) {			// closest object found?
 			closestObjectNode = childGeometryNode;
 			closestObjectPrim = childPrim;
 			tmin = t0;
 		} // if
-		cout << "test" << endl;
 	} // for
 
 	if ( closestObjectNode != NULL ) {									// if we found an object
