@@ -1,2 +1,10 @@
 *.png
-out.txt
+*out.txt
+
+*.dvi
+
+# ignore sublime files
+*.sublime-project
+*.sublime-workspace
+
+src/A4

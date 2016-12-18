@@ -20,8 +20,7 @@ raytracer/src$ make
 ---
 
 ## TODO
-
-## not in any particular order:
+(in no particular order)
 * rewrite from scratch
 * reflections
 * textures
