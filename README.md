@@ -1,5 +1,6 @@
-# CS488-raytracer
-A basic ray tracer with Phong Illumination
+# raytracer
+A basic ray tracer with Phong Illumination.
+I originally made this for CS488, Intro to Computer Graphics, at the University of Waterloo.
 
 ![Alt Text](screenshot.png)
 
@@ -8,12 +9,12 @@ A basic ray tracer with Phong Illumination
 ## Build
 
 ```
-$ cd CS488-raytracer
-CS488-raytracer$ premake4 gmake
-CS488-raytracer$ make
-CS488-raytracer$ cd src
-CS488-raytracer/src$ premake4 gmake
-CS488-raytracer/src$ make
+$ cd raytracer
+raytracer$ premake4 gmake
+raytracer$ make
+raytracer$ cd src
+raytracer/src$ premake4 gmake
+raytracer/src$ make
 ```
 
 ---
