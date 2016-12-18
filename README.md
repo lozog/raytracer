@@ -19,9 +19,7 @@ raytracer/src$ make
 
 ---
 
-# TODO
-
----
+## TODO
 
 ## not in any particular order:
 * rewrite from scratch
